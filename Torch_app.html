@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Torch App</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      font-family: sans-serif;
+      color: white;
+      background-image: url('https://images.unsplash.com/photo-1598387990659-badf490b89b1?auto=format&fit=crop&w=800&q=80');
+      background-size: cover;
+      background-position: center;
+      text-align: center;
+    }
+
+    #topImage {
+      width: 120px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    #torchImage {
+      width: 200px;
+      height: 200px;
+      background: url('https://img.icons8.com/ios-filled/250/ffffff/flashlight.png') no-repeat center;
+      background-size: contain;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background-color: #ff9800;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #e68900;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- New image added here -->
+  <img src="https://img.icons8.com/clouds/100/flash-on.png" id="topImage" alt="Torch Logo">
+
+  <div id="torchImage"></div>
+  <button id="toggleTorch">Turn On Torch</button>
+
+  <script>
+    let stream;
+    let track;
+    let isTorchOn = false;
+
+    const btn = document.getElementById('toggleTorch');
+
+    async function toggleTorch() {
+      if (!isTorchOn) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              advanced: [{ torch: true }]
+            }
+          });
+
+          track = stream.getVideoTracks()[0];
+
+          await track.applyConstraints({
+            advanced: [{ torch: true }]
+          });
+
+          isTorchOn = true;
+          btn.textContent = 'Turn Off Torch';
+        } catch (err) {
+          alert("Torch not supported or permission denied.");
+          console.error(err);
+        }
+      } else {
+        if (track) track.stop();
+        if (stream) stream.getTracks().forEach(track => track.stop());
+        isTorchOn = false;
+        btn.textContent = 'Turn On Torch';
+      }
+    }
+
+    btn.addEventListener('click', toggleTorch);
+  </script>
+
+</body>
+</html>
